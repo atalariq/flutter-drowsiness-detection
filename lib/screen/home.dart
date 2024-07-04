@@ -20,9 +20,10 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
-        centerTitle: true,
-        // leading: const Icon(Icons.menu),
-        leading: Image.asset("/assets/logo.png"),
+        leading: ImageIcon(
+          AssetImage("assets/logo.png"),
+          size: 24,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
