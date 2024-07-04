@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../component/statistic.dart';
+// import '../component/statistic.dart';
 import '../component/navigation_page_button.dart';
 
 class HomePage extends StatefulWidget {
@@ -21,7 +21,8 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
         centerTitle: true,
-        leading: const Icon(Icons.menu),
+        // leading: const Icon(Icons.menu),
+        leading: Image.asset("/assets/logo.png"),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings),
@@ -35,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            StatsWidget(),
+            // StatsWidget(),
             SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

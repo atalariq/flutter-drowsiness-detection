@@ -6,16 +6,16 @@ class AboutPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('About Us'),
-      ),
+      appBar: AppBar(),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: const [
             Text(
-              'This is the About Us page.',
-              style: TextStyle(fontSize: 24),
+              'This is the\nAbout Us page.',
+              style: TextStyle(
+                fontSize: 12,
+              ),
             ),
           ],
         ),
