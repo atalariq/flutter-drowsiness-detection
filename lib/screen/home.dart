@@ -18,11 +18,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
-        leading: ImageIcon(
-          AssetImage("assets/logo.png"),
-          size: 24,
+        leading: Image.asset(
+          "assets/logo.png",
+          width: 30,
+          height: 30,
         ),
         actions: [
           IconButton(
@@ -60,13 +61,13 @@ class _HomePageState extends State<HomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 NavButton(
-                  text: "Feedback",
+                  text: "Umpan\nBalik",
                   icon: Icons.message_outlined,
                   destination: '/feedback',
                 ),
                 SizedBox(width: 20),
                 NavButton(
-                  text: "About",
+                  text: "Tentang\nKami",
                   icon: Icons.info_outline_rounded,
                   destination: '/about',
                 ),

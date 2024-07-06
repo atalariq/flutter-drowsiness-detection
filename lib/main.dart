@@ -6,6 +6,7 @@ import 'screen/help.dart';
 import 'screen/home.dart';
 import 'screen/monitoring.dart';
 import 'screen/settings.dart';
+import 'screen/splash.dart';
 
 void main() {
   runApp(const MyApp());
@@ -26,7 +27,9 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const HomePage(title: 'Si Perisai'),
-        '/about': (context) => const AboutPage(),
+        '/splash': (context) => const SplashScreen(),
+        '/home': (context) => const HomePage(title: 'Si Perisai'),
+        '/about': (context) => const AboutUsPage(),
         '/feedback': (context) => const FeedbackPage(),
         '/help': (context) => const HelpPage(),
         '/monitoring': (context) => const MonitoringPage(),
