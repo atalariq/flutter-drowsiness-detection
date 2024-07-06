@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_faq/flutter_faq.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -25,6 +26,10 @@ class HelpPage extends StatelessWidget {
               'This is the Help page.',
               style: TextStyle(fontSize: 24),
             ),
+            FAQ(question: "Question 1", answer: "data"),
+            FAQ(question: "Question 2", answer: "data"),
+            FAQ(question: "Question 3", answer: "data"),
+            FAQ(question: "Question 4", answer: "data"),
           ],
         ),
       ),

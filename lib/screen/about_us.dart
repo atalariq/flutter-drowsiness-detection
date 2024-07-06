@@ -17,18 +17,16 @@ class AboutPage extends StatelessWidget {
           },
         ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
-            Text(
-              'This is the\nAbout Us page.',
-              style: TextStyle(
-                fontSize: 12,
-              ),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: const [
+          Text(
+            'This is the\nAbout Us page.',
+            style: TextStyle(
+              fontSize: 12,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
