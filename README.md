@@ -1,20 +1,14 @@
-# myapp
+# Si Perisai
 
-A new Flutter project.
+*Microsleep* detection app, built with Flutter + ML Kit
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
+## Dependencies
+- https://pub.dev/packages/introduction_screen
+- https://pub.dev/packages/flutter_settings_screens
+- https://pub.dev/packages/camera
+- https://pub.dev/packages/flutter_ringtone_player
+- https://pub.dev/packages/google_mlkit_face_detection
+- https://pub.dev/packages/learning_face_detection
 
 ## Resources
 - https://www.youtube.com/watch?v=D4nhaszNW4o

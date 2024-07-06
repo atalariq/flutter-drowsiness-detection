@@ -1,44 +1,75 @@
 import 'package:flutter/material.dart';
 
-// import '../component/statistic.dart';
+import '../component/statistic.dart';
 import '../component/navigation_page_button.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key, required this.title});
-
-  // States
-  final String title;
-
+  const HomePage({super.key});
   @override
   State<HomePage> createState() => _HomePageState();
+}
+
+class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const MyAppBar({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(left: 10, right: 10, top: 5),
+      child: AppBar(
+        // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: Text(
+          "Si Perisai",
+          style: const TextStyle(
+            fontSize: 28,
+            fontFamily: "Lexend",
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        leading: Row(
+          children: [
+            SizedBox(width: 20),
+            Image.asset(
+              "assets/logo.png",
+              height: 80,
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings_outlined,
+              size: 40,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, '/settings');
+            },
+          ),
+          SizedBox(width: 10),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
 
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-        leading: Image.asset(
-          "assets/logo.png",
-          width: 30,
-          height: 30,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              Navigator.pushNamed(context, '/settings');
-            },
-          ),
-        ],
-      ),
+      appBar: MyAppBar(),
       body: const Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            // StatsWidget(),
+            SizedBox(height: 40),
+
+            // Statistic
+            StatsWidget(),
+
+            // Buttons
             SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,

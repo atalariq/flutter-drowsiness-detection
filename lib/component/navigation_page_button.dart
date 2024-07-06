@@ -14,15 +14,15 @@ class NavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         Navigator.pushNamed(context, destination);
       },
-      child: Container(
+      child: Ink(
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: Color(0x77FFB81C),
+          color: Color(0x66FFB81C),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(

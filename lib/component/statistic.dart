@@ -8,314 +8,152 @@ class StatsWidget extends StatefulWidget {
 }
 
 class _StatsWidgetState extends State<StatsWidget> {
+  String _conclusion = "Kondisi Anda Masih Baik!";
+  String _uptime = "00:00";
+  int _awakeness = 100;
+  int _sleepiness = 0;
+
+  void _resetStats() {
+    // Implement your reset logic here
+    setState(() {
+      _conclusion = "Kondisi Anda Masih Baik!";
+      _uptime = "00:00";
+      _awakeness = 100;
+      _sleepiness = 0;
+    });
+  }
+
+  // Stat Widget helper
+  Widget _miniStat(String title, String value) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: Color(0x66FFB81C),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 10,
+              fontFamily: "Roboto",
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          Text(
+            value,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 16,
+              fontFamily: "Roboto",
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        width: 300,
-        height: 200,
-        child: Stack(children: <Widget>[
-          Positioned(
-              top: 0,
-              left: 0,
-              child: Container(
-                  width: 300,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                      bottomLeft: Radius.circular(20),
-                      bottomRight: Radius.circular(20),
-                    ),
-                    color: Color.fromRGBO(255, 184, 28, 0.4000000059604645),
-                  ))),
-          Positioned(
-              top: 12.5,
-              left: 15,
-              child: Container(
-                decoration: BoxDecoration(),
-                padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(),
-                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Text(
-                            'Stat',
-                            textAlign: TextAlign.left,
-                            style: TextStyle(
-                                color: Color.fromRGBO(0, 0, 0, 1),
-                                fontFamily: 'Roboto',
-                                fontSize: 30,
-                                letterSpacing:
-                                    0 /*percentages not used in flutter. defaulting to zero*/,
-                                fontWeight: FontWeight.normal,
-                                height: 1),
-                          ),
-                          SizedBox(width: 15),
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                                bottomLeft: Radius.circular(20),
-                                bottomRight: Radius.circular(20),
-                              ),
-                              color: Color.fromRGBO(
-                                  255, 184, 28, 0.4000000059604645),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 15, vertical: 5),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Text(
-                                  'Reset',
-                                  textAlign: TextAlign.left,
-                                  style: TextStyle(
-                                      color: Color.fromRGBO(0, 0, 0, 1),
-                                      fontFamily: 'Roboto',
-                                      fontSize: 12,
-                                      letterSpacing:
-                                          0 /*percentages not used in flutter. defaulting to zero*/,
-                                      fontWeight: FontWeight.normal,
-                                      height: 0),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    Container(
-                      decoration: BoxDecoration(),
-                      padding: EdgeInsets.symmetric(horizontal: 0, vertical: 0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Container(
-                            decoration: BoxDecoration(),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 0, vertical: 0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: Stack(children: <Widget>[
-                                      Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          child: Container(
-                                              width: 80,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(16),
-                                                  topRight: Radius.circular(16),
-                                                  bottomLeft:
-                                                      Radius.circular(16),
-                                                  bottomRight:
-                                                      Radius.circular(16),
-                                                ),
-                                                color: Color.fromRGBO(255, 184,
-                                                    28, 0.4000000059604645),
-                                              ))),
-                                      Positioned(
-                                          top: 16,
-                                          left: 15,
-                                          child: Container(
-                                            decoration: BoxDecoration(),
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 0, vertical: 0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Waktu Pemakaian',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 10,
-                                                      letterSpacing:
-                                                          0 /*percentages not used in flutter. defaulting to zero*/,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                                SizedBox(height: 5),
-                                                Text(
-                                                  '02:34',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 16,
-                                                      letterSpacing:
-                                                          0 /*percentages not used in flutter. defaulting to zero*/,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                              ],
-                                            ),
-                                          )),
-                                    ])),
-                                SizedBox(width: 15),
-                                SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: Stack(children: <Widget>[
-                                      Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          child: Container(
-                                              width: 80,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(16),
-                                                  topRight: Radius.circular(16),
-                                                  bottomLeft:
-                                                      Radius.circular(16),
-                                                  bottomRight:
-                                                      Radius.circular(16),
-                                                ),
-                                                color: Color.fromRGBO(255, 184,
-                                                    28, 0.4000000059604645),
-                                              ))),
-                                      Positioned(
-                                          top: 16,
-                                          left: 16,
-                                          child: Container(
-                                            decoration: BoxDecoration(),
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 0, vertical: 0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Tingkat Kesadaran',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 10,
-                                                      letterSpacing:
-                                                          0 /*percentages not used in flutter. defaulting to zero*/,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                                SizedBox(height: 5),
-                                                Text(
-                                                  '91%',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                              ],
-                                            ),
-                                          )),
-                                    ])),
-                                SizedBox(width: 15),
-                                SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: Stack(children: <Widget>[
-                                      Positioned(
-                                          top: 0,
-                                          left: 0,
-                                          child: Container(
-                                              width: 80,
-                                              height: 80,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(16),
-                                                  topRight: Radius.circular(16),
-                                                  bottomLeft:
-                                                      Radius.circular(16),
-                                                  bottomRight:
-                                                      Radius.circular(16),
-                                                ),
-                                                color: Color.fromRGBO(
-                                                    255, 184, 28, 0.4),
-                                              ))),
-                                      Positioned(
-                                          top: 16,
-                                          left: 23,
-                                          child: Container(
-                                            decoration: BoxDecoration(),
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 0, vertical: 0),
-                                            child: Column(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: <Widget>[
-                                                Text(
-                                                  'Tingkat Kantuk',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 10,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                                SizedBox(height: 5),
-                                                Text(
-                                                  '9%',
-                                                  textAlign: TextAlign.center,
-                                                  style: TextStyle(
-                                                      color: Color.fromRGBO(
-                                                          0, 0, 0, 1),
-                                                      fontFamily: 'Roboto',
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.normal,
-                                                      height: 1),
-                                                ),
-                                              ],
-                                            ),
-                                          )),
-                                    ])),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 15),
-                          Text(
-                            'Kondisi Anda masih Baik!',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                color: Color.fromRGBO(0, 0, 0, 1),
-                                fontFamily: 'Roboto',
-                                fontSize: 16,
-                                fontWeight: FontWeight.normal,
-                                height: 1),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+    return Container(
+      width: 300,
+      height: 200,
+      decoration: BoxDecoration(
+        color: Color(0x66FFB81C),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Title and Reset Button
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 5),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  "Stats",
+                  style: TextStyle(
+                    fontSize: 30,
+                    fontFamily: "Roboto",
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
-              )),
-        ]));
+                Spacer(),
+                InkWell(
+                  onTap: _resetStats, // Handle your callback
+                  child: Ink(
+                    width: 72,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Color(0x66FFB81C),
+                      borderRadius: BorderRadius.all(Radius.circular(16)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history,
+                            size: 16,
+                          ),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          Text(
+                            "Reset",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontFamily: "Roboto",
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ),
+
+          // Stats
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                _miniStat("Waktu\nPemakaian", _uptime),
+                SizedBox(width: 10),
+                _miniStat("Tingkat\nKesadaran", "${_awakeness.toString()}%"),
+                SizedBox(width: 10),
+                _miniStat("Tingkat\nKantuk", "${_sleepiness.toString()}%"),
+              ],
+            ),
+          ),
+
+          // Conclusion
+          Text(
+            _conclusion,
+            style: TextStyle(
+              fontSize: 20,
+              fontFamily: "Roboto",
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

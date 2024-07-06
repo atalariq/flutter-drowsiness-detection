@@ -18,23 +18,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Si Perisai',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
-        useMaterial3: true,
-      ),
-      initialRoute: '/',
-      routes: {
-        '/': (context) => const HomePage(title: 'Si Perisai'),
-        '/splash': (context) => const SplashScreen(),
-        '/home': (context) => const HomePage(title: 'Si Perisai'),
-        '/about': (context) => const AboutUsPage(),
-        '/feedback': (context) => const FeedbackPage(),
-        '/help': (context) => const HelpPage(),
-        '/monitoring': (context) => const MonitoringPage(),
-        '/settings': (context) => const SettingsPage(),
-      }
-    );
+        debugShowCheckedModeBanner: false,
+        title: 'Si Perisai',
+        theme: ThemeData(
+          // colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
+          useMaterial3: true,
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.black,
+            ),
+          ),
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (context) => const HomePage(),
+          '/splash': (context) => const SplashScreen(),
+          '/home': (context) => const HomePage(),
+          '/about': (context) => const AboutUsPage(),
+          '/feedback': (context) => const FeedbackPage(),
+          '/help': (context) => const HelpPage(),
+          '/monitoring': (context) => const MonitoringPage(),
+          '/settings': (context) => const SettingsPage(),
+        });
   }
 }
