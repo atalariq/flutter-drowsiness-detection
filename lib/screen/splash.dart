@@ -1,7 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  late bool _showIntroPage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+
+    // Timer
+    Future.delayed(Duration(seconds: 3), () {
+      if (_showIntroPage) {
+        _dontShowIntroAgain();
+        Navigator.pushReplacementNamed(context, '/intro');
+      } else {
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    });
+  }
+
+  // Loads preferences asynchronously and sets the value of _showIntroPage based on the 'isFirstLaunch' key in SharedPreferences.
+  void _loadPreferences() async {
+    final prefs = await SharedPreferences.getInstance();
+    _showIntroPage = prefs.getBool('isFirstLaunch') ?? true;
+  }
+
+  /// Sets the value of the 'isFirstLaunch' key in the shared preferences to false.
+  void _dontShowIntroAgain() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isFirstLaunch', false);
+  }
 
   @override
   Widget build(BuildContext context) {

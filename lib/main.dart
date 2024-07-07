@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'screen/introduction.dart';
 import 'screen/about_us.dart';
 import 'screen/feedback.dart';
 import 'screen/help.dart';
@@ -8,7 +8,8 @@ import 'screen/monitoring.dart';
 import 'screen/settings.dart';
 import 'screen/splash.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -25,20 +26,21 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           textButtonTheme: TextButtonThemeData(
             style: TextButton.styleFrom(
-              foregroundColor: Colors.black,
+              foregroundColor: const Color.fromRGBO(0, 0, 0, 1),
             ),
           ),
         ),
-        initialRoute: '/',
+        initialRoute:  '/',
         routes: {
-          '/': (context) => const HomePage(),
-          '/splash': (context) => const SplashScreen(),
+          '/': (context) => const SplashScreen(),
+          '/intro': (context) => const IntroductionPage(),
           '/home': (context) => const HomePage(),
           '/about': (context) => const AboutUsPage(),
           '/feedback': (context) => const FeedbackPage(),
           '/help': (context) => const HelpPage(),
           '/monitoring': (context) => const MonitoringPage(),
-          '/settings': (context) => const SettingsPage(),
-        });
+          '/settings': (context) => SettingsPage(),
+        },
+    );
   }
 }

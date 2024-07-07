@@ -11,11 +11,17 @@ class FeedbackPage extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: const [
+             // Title
             Text(
-              'This is the Feedback page.',
-              style: TextStyle(fontSize: 24),
+              'Umpan Balik',
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: "Roboto",
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),

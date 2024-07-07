@@ -1,4 +1,7 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+
+import '../detector.dart';
 
 class MonitoringPage extends StatefulWidget {
   const MonitoringPage({super.key});
@@ -8,6 +11,32 @@ class MonitoringPage extends StatefulWidget {
 }
 
 class _MonitoringPageState extends State<MonitoringPage> {
+  final DrowsinessDetector _drowsinessDetector = DrowsinessDetector();
+  bool _isDrowsy = false;
+
+  Future<void> _initializeDrowsinessDetector() async {
+    await _drowsinessDetector.initialize();
+    _drowsinessDetector.cameraController?.addListener(() {
+      if (_drowsinessDetector.isDrowsy != _isDrowsy) {
+        setState(() {
+          _isDrowsy = _drowsinessDetector.isDrowsy;
+        });
+      }
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDrowsinessDetector();
+  }
+
+  @override
+  void dispose() {
+    _drowsinessDetector.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,10 +55,30 @@ class _MonitoringPageState extends State<MonitoringPage> {
       ),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Camera Preview
 
-            Spacer(),
+            Stack(
+              children: [
+                if (_drowsinessDetector.cameraController != null &&
+                    _drowsinessDetector.cameraController!.value.isInitialized &&
+                    _drowsinessDetector.isPreviewEnabled)
+                  CameraPreview(_drowsinessDetector.cameraController!),
+                // if (_isDrowsy)
+                //   Center(
+                //     child: Container(
+                //       padding: EdgeInsets.all(16.0),
+                //       color: Colors.red,
+                //       child: Text(
+                //         'You are drowsy!',
+                //         style: TextStyle(fontSize: 24, color: Colors.white),
+                //       ),
+                //     ),
+                //   ),
+              ],
+            ),
 
             // Button
             Container(
@@ -54,36 +103,36 @@ class _MonitoringPageState extends State<MonitoringPage> {
                     children: [
                       // Toggle Camera Preview
                       IconButton(
-                        onPressed: () {},
                         icon: Icon(
                           Icons.preview_outlined,
                           size: 60,
                           color: Colors.white,
                         ),
+                        onPressed: _drowsinessDetector.togglePreview,
                       ),
 
                       SizedBox(width: 30),
 
                       // Start/Stop Detection
                       IconButton(
-                        onPressed: () {},
                         icon: Icon(
                           Icons.adjust_outlined,
                           size: 60,
                           color: Colors.white,
                         ),
+                        onPressed: _drowsinessDetector.startDetection,
                       ),
 
                       SizedBox(width: 30),
 
                       // Toggle Camera Mode
                       IconButton(
-                        onPressed: () {},
                         icon: Icon(
                           Icons.flip_camera_android_outlined,
                           size: 60,
                           color: Colors.white,
                         ),
+                        onPressed: _drowsinessDetector.toggleMode,
                       ),
                     ],
                   ),
