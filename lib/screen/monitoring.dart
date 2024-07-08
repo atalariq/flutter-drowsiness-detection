@@ -13,6 +13,8 @@ class MonitoringPage extends StatefulWidget {
 class _MonitoringPageState extends State<MonitoringPage> {
   final DrowsinessDetector _drowsinessDetector = DrowsinessDetector();
   bool _isDrowsy = false;
+  bool _isDetecting = false;
+  bool _isAlarmPlaying = false;
 
   Future<void> _initializeDrowsinessDetector() async {
     await _drowsinessDetector.initialize();
@@ -20,6 +22,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
       if (_drowsinessDetector.isDrowsy != _isDrowsy) {
         setState(() {
           _isDrowsy = _drowsinessDetector.isDrowsy;
+          if (_isDrowsy) {
+            _isAlarmPlaying = true;
+          }
         });
       }
     });
@@ -35,6 +40,25 @@ class _MonitoringPageState extends State<MonitoringPage> {
   void dispose() {
     _drowsinessDetector.dispose();
     super.dispose();
+  }
+
+  Future<void> _toggleDetection() async {
+    if (_isDetecting) {
+      await _drowsinessDetector.stopDetection();
+    } else {
+      await _drowsinessDetector.startDetection();
+    }
+    setState(() {
+      _isDetecting = !_isDetecting;
+    });
+  }
+
+  Future<void> _stopAlarm() async {
+    await _drowsinessDetector.stopAlarm();
+    setState(() {
+      _isAlarmPlaying = false;
+      _isDetecting = false;
+    });
   }
 
   @override
@@ -58,29 +82,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Camera Preview
 
+            // Camera Preview
             Stack(
               children: [
                 if (_drowsinessDetector.cameraController != null &&
                     _drowsinessDetector.cameraController!.value.isInitialized &&
                     _drowsinessDetector.isPreviewEnabled)
                   CameraPreview(_drowsinessDetector.cameraController!),
-                // if (_isDrowsy)
-                //   Center(
-                //     child: Container(
-                //       padding: EdgeInsets.all(16.0),
-                //       color: Colors.red,
-                //       child: Text(
-                //         'You are drowsy!',
-                //         style: TextStyle(fontSize: 24, color: Colors.white),
-                //       ),
-                //     ),
-                //   ),
               ],
             ),
 
-            // Button
+            // Status Label + Buttons
             Container(
               color: Colors.black,
               height: 120,
@@ -90,7 +103,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
 
                   // Label
                   Text(
-                    'Status: Aktif',
+                    "Status: ${_isDetecting ? (_isDrowsy ? 'Alarm!!!' : 'Aktif') : 'Tidak Aktif'}",
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 10,
@@ -98,6 +111,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                   ),
                   SizedBox(height: 10),
 
+                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -108,20 +122,33 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           size: 60,
                           color: Colors.white,
                         ),
-                        onPressed: _drowsinessDetector.togglePreview,
+                        onPressed: () {
+                          setState(() {
+                            _drowsinessDetector.togglePreview();
+                          });
+                        },
                       ),
 
                       SizedBox(width: 30),
 
                       // Start/Stop Detection
-                      IconButton(
-                        icon: Icon(
-                          Icons.adjust_outlined,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                        onPressed: _drowsinessDetector.startDetection,
-                      ),
+                      (_isAlarmPlaying)
+                          ? IconButton(
+                              icon: Icon(
+                                Icons.adjust_outlined,
+                                size: 60,
+                                color: Colors.red,
+                              ),
+                              onPressed: _stopAlarm,
+                            )
+                          : IconButton(
+                              icon: Icon(
+                                Icons.adjust_outlined,
+                                size: 60,
+                                color: Colors.white,
+                              ),
+                              onPressed: _toggleDetection,
+                            ),
 
                       SizedBox(width: 30),
 
@@ -132,7 +159,10 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           size: 60,
                           color: Colors.white,
                         ),
-                        onPressed: _drowsinessDetector.toggleMode,
+                        onPressed: () async {
+                          await _drowsinessDetector.toggleMode();
+                          setState(() {});
+                        },
                       ),
                     ],
                   ),

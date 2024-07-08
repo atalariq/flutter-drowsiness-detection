@@ -1,42 +1,63 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_settings_ui/flutter_settings_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../detector.dart';
+
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  final DrowsinessDetector drowsinessDetector;
+
+  const SettingsPage({super.key, required this.drowsinessDetector});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-
-  late String _cameraMode;
-  late bool _cameraPreview;
-  late String _alarmSound;
+  late int _cameraModeIndex;
+  late bool _previewEnabled;
   late int _alarmInterval;
+  late String _alarmSound;
+
+  final List<String> _alarmSounds = [
+    'alarm1',
+    'alarm2',
+    'alarm3',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
+    _loadSettings();
   }
 
-  // Loads preferences asynchronously and sets the value of _showIntroPage based on the 'isFirstLaunch' key in SharedPreferences.
-  void _loadPreferences() async {
+  Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    _cameraMode = prefs.getString('cameraMode') ?? 'front';
-    _cameraPreview = prefs.getBool('cameraPreview') ?? true;
-    _alarmSound = prefs.getString('alarmSound') ?? 'default';
-    _alarmInterval = prefs.getInt('alarmInterval') ?? 5;
+    setState(() {
+      _previewEnabled = prefs.getBool('previewEnabled') ?? true;
+      _cameraModeIndex = prefs.getInt('cameraMode') ?? 0;
+      _alarmInterval = prefs.getInt('drowsinessInterval') ?? 5;
+      _alarmSound = prefs.getString('alarmSound') ?? _alarmSounds.first;
+    });
   }
 
-  void _resetPreferences() async {
+  Future<void> _saveSettings() async {
     final prefs = await SharedPreferences.getInstance();
-    prefs.setString('cameraMode', 'front');
-    prefs.setBool('cameraPreview', true);
-    prefs.setString('alarmSound', 'default');
-    prefs.setInt('alarmInterval', 5);
+    await prefs.setBool('previewEnabled', _previewEnabled);
+    await prefs.setInt('cameraMode', _cameraModeIndex);
+    await prefs.setInt('drowsinessInterval', _alarmInterval);
+    await prefs.setString('alarmSound', _alarmSound);
+  }
+
+  void _resetSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    await _loadSettings();
+  }
+
+  Future<void> updateDrowsinessInterval(int interval) async {
+    _alarmInterval = interval;
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('alarmInterval', interval);
   }
 
   @override
@@ -57,54 +78,102 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
 
-          // Settings
-          SettingsList(
-            sections: [
-              SettingsSection(
-                tiles: [
-                  SettingsTile(
-                    title: Text('Mode Kamera'),
-                    description: Text(
-                      "Atur penggunaan mode kamera depan/belakang",
-                    ),
-                    value: Text(_cameraMode),
-                    onPressed: (BuildContext context) {},
-                  ),
-                  SettingsTile.switchTile(
-                    title: Text('Pratinjau Kamera'),
-                    description: Text(
-                        'Tampilkan pratinjau secara bawaan\n(Nonaktifkan untuk menghemat baterai)'),
-                    initialValue: _cameraPreview,
-                    onToggle: (bool value) {},
-                  ),
-                  SettingsTile(
-                    title: Text('Interval Peringatan'),
-                    description: Text(
-                      "Atur jeda alarm peringatan ketika terdeteksi",
-                    ),
-                    value: Text(_alarmInterval.toString()),
-                    onPressed: (BuildContext context) {},
-                  ),
-                  SettingsTile(
-                    title: Text('Bunyi Alarm'),
-                    description: Text(
-                      "Atur bunyi alarm yang digunakan",
-                    ),
-                    value: Text(_alarmSound),
-                    onPressed: (BuildContext context) {},
-                  ),
-                  SettingsTile(
-                    title: Text('Atur Ulang'),
-                    description: Text(
-                      "Kembalikan ke pengaturan awal",
-                    ),
-                    onPressed: (BuildContext context) {
-                      _resetPreferences();
+          Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SwitchListTile(
+                  title: Text('Enable Camera Preview'),
+                  value: _previewEnabled,
+                  onChanged: (value) async {
+                    setState(() {
+                      _previewEnabled = value;
+                    });
+                    await widget.drowsinessDetector.togglePreview();
+                    await _saveSettings();
+                  },
+                ),
+                ListTile(
+                  title: Text('Camera Mode'),
+                  subtitle: Text(_cameraModeIndex == 0 ? 'Front' : 'Back'),
+                  trailing: DropdownButton<int>(
+                    value: _cameraModeIndex,
+                    items: [
+                      DropdownMenuItem(
+                        value: 0,
+                        child: Text('Front'),
+                      ),
+                      DropdownMenuItem(
+                        value: 1,
+                        child: Text('Back'),
+                      ),
+                    ],
+                    onChanged: (int? newValue) async {
+                      if (newValue != null) {
+                        setState(() {
+                          _cameraModeIndex = newValue;
+                        });
+                        await widget.drowsinessDetector.toggleMode();
+                        await _saveSettings();
+                      }
                     },
                   ),
-                ],
-              ),
-            ],
+                ),
+                ListTile(
+                  title: Text('Drowsiness Interval (seconds)'),
+                  trailing: DropdownButton<int>(
+                    value: _alarmInterval,
+                    items: [3, 5, 7, 10].map((int value) {
+                      return DropdownMenuItem<int>(
+                        value: value,
+                        child: Text(value.toString()),
+                      );
+                    }).toList(),
+                    onChanged: (int? newValue) async {
+                      if (newValue != null) {
+                        setState(() {
+                          _alarmInterval = newValue;
+                        });
+                        await widget.drowsinessDetector
+                            .updateDrowsinessInterval(newValue);
+                        await _saveSettings();
+                      }
+                    },
+                  ),
+                ),
+                ListTile(
+                  title: Text('Alarm Sound'),
+                  trailing: DropdownButton<String>(
+                    value: _alarmSound,
+                    items: _alarmSounds.map((String sound) {
+                      return DropdownMenuItem<String>(
+                        value: sound,
+                        child: Text(sound),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) async {
+                      if (newValue != null) {
+                        setState(() {
+                          _alarmSound = newValue;
+                        });
+                        await _saveSettings();
+                      }
+                    },
+                  ),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: () async {
+                    _resetSettings();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Settings reset to default')),
+                    );
+                  },
+                  child: Text('Reset Settings'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
