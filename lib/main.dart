@@ -1,42 +1,25 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+
 import 'screen/introduction.dart';
 import 'screen/about_us.dart';
 import 'screen/feedback.dart';
 import 'screen/help.dart';
 import 'screen/home.dart';
-import 'screen/monitoring.dart';
+import 'screen/monitoring_v2.dart';
 import 'screen/settings.dart';
 import 'screen/splash.dart';
 
-import 'detector.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  final cameras = await availableCameras();
+  runApp(MyApp(camera: cameras.first));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key, required this.camera});
 
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late DrowsinessDetector _drowsinessDetector;
-
-  @override
-  void initState() {
-    super.initState();
-    _drowsinessDetector = DrowsinessDetector();
-    _drowsinessDetector.initialize();
-  }
-
-  @override
-  void dispose() {
-    _drowsinessDetector.stopDetection();
-    super.dispose();
-  }
+  final CameraDescription camera;
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +29,6 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(
         // colorScheme: ColorScheme.fromSeed(seedColor: Colors.amber),
         useMaterial3: true,
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: const Color.fromRGBO(0, 0, 0, 1),
-          ),
-        ),
       ),
       initialRoute: '/',
       routes: {
@@ -60,10 +38,8 @@ class _MyAppState extends State<MyApp> {
         '/about': (context) => const AboutUsPage(),
         '/feedback': (context) => const FeedbackPage(),
         '/help': (context) => const HelpPage(),
-        '/monitoring': (context) => const MonitoringPage(),
-        '/settings': (context) => SettingsPage(
-              drowsinessDetector: _drowsinessDetector,
-            ),
+        '/monitoring': (context) => MonitoringPageV2(camera: camera),
+        '/settings': (context) => const SettingsPage(),
       },
     );
   }

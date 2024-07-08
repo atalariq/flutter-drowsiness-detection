@@ -5,19 +5,16 @@ import '../component/navigation_page_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-  
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
-class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const MyAppBar({super.key});
-
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: 10, right: 10, top: 5),
-      child: AppBar(
+    return Scaffold(
+      appBar: AppBar(
         // backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(
           "Si Perisai",
@@ -40,7 +37,7 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           IconButton(
             icon: const Icon(
               Icons.settings_outlined,
-              size: 40,
+              size: 36,
             ),
             onPressed: () {
               Navigator.pushNamed(context, '/settings');
@@ -49,18 +46,6 @@ class MyAppBar extends StatelessWidget implements PreferredSizeWidget {
           SizedBox(width: 10),
         ],
       ),
-    );
-  }
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-}
-
-class _HomePageState extends State<HomePage> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: MyAppBar(),
       body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -74,6 +59,7 @@ class _HomePageState extends State<HomePage> {
             SizedBox(height: 40),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 NavButton(
                   text: "Pelajari",

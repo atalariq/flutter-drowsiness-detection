@@ -9,7 +9,7 @@ class StatsWidget extends StatefulWidget {
 
 class _StatsWidgetState extends State<StatsWidget> {
   String _conclusion = "Kondisi Anda Masih Baik!";
-  String _uptime = "00:00";
+  String _uptime = "00:00:00";
   int _awakeness = 100;
   int _sleepiness = 0;
 
@@ -91,8 +91,8 @@ class _StatsWidgetState extends State<StatsWidget> {
                 InkWell(
                   onTap: _resetStats, // Handle your callback
                   child: Ink(
-                    width: 72,
-                    height: 20,
+                    width: 75,
+                    height: 25,
                     decoration: BoxDecoration(
                       color: Color(0x66FFB81C),
                       borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -102,7 +102,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
+                        children: const [
                           Icon(
                             Icons.history,
                             size: 16,
@@ -146,6 +146,7 @@ class _StatsWidgetState extends State<StatsWidget> {
           // Conclusion
           Text(
             _conclusion,
+            textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,
               fontFamily: "Roboto",

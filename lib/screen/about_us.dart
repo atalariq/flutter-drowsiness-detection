@@ -3,6 +3,36 @@ import 'package:flutter/material.dart';
 class AboutUsPage extends StatelessWidget {
   const AboutUsPage({super.key});
 
+  Widget _customButton(
+      {required IconData icon,
+      required String label,
+      required VoidCallback onPressed}) {
+    return Column(
+      children: [
+        TextButton.icon(
+          icon: Icon(
+            icon,
+            size: 22,
+            color: Colors.black,
+          ),
+          label: Text(
+            label,
+            style: TextStyle(
+              color: Colors.black,
+              fontFamily: "Roboto",
+              fontWeight: FontWeight.normal,
+              fontSize: 12,
+            ),
+          ),
+          onPressed: onPressed,
+        ),
+        SizedBox(
+          height: 10,
+        )
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -76,7 +106,7 @@ class AboutUsPage extends StatelessWidget {
                   child: Image.asset(
                     "assets/logo.png",
                     width: 80,
-                    height: 800,
+                    height: 80,
                   ),
                 ),
                 Padding(
@@ -84,19 +114,19 @@ class AboutUsPage extends StatelessWidget {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
+                    children: const [
                       Text(
                         "Si Perisai",
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontFamily: "Lexend",
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
-                        "Version 1.0",
+                        "Version 1.0.0",
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 10,
                           fontFamily: "Lexend",
                           fontWeight: FontWeight.w300,
                         ),
@@ -108,7 +138,7 @@ class AboutUsPage extends StatelessWidget {
             ),
 
             SizedBox(
-              height: 20,
+              height: 40,
             ),
 
             // Buttons
@@ -120,41 +150,46 @@ class AboutUsPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton.icon(
-                      icon: Icon(Icons.star),
-                      label: Text("Nilai Aplikasi Kami"),
+                    _customButton(
+                      icon: Icons.star,
+                      label: "Nilai Aplikasi Kami",
                       onPressed: () {},
                     ),
-                    TextButton.icon(
-                      icon: Icon(Icons.download),
-                      label: Text("Update Aplikasi"),
+                    _customButton(
+                      icon: Icons.download,
+                      label: "Update Aplikasi",
                       onPressed: () {},
                     ),
-                    TextButton.icon(
-                      icon: Icon(Icons.lock),
-                      label: Text("Kebijakan Privasi"),
+                    _customButton(
+                      icon: Icons.lock,
+                      label: "Kebijakan Privasi",
                       onPressed: () {},
                     ),
                   ],
+                ),
+                SizedBox(
+                  width: 20,
                 ),
                 Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton.icon(
-                      icon: Icon(Icons.share),
-                      label: Text("Bagikan Aplikasi Kami"),
+                    _customButton(
+                      icon: Icons.share,
+                      label: "Bagikan Aplikasi Kami",
                       onPressed: () {},
                     ),
-                    TextButton.icon(
-                      icon: Icon(Icons.feedback),
-                      label: Text("Berikan Masukan"),
+                    _customButton(
+                      icon: Icons.feedback,
+                      label: "Berikan Masukan",
                       onPressed: () {},
                     ),
-                    TextButton.icon(
-                      icon: Icon(Icons.menu_book_outlined),
-                      label: Text("Perkenalan Aplikasi"),
-                      onPressed: () {},
+                    _customButton(
+                      icon: Icons.menu_book_outlined,
+                      label: "Perkenalan Aplikasi",
+                      onPressed: () {
+                        Navigator.pushNamed(context, '/intro');
+                      },
                     ),
                   ],
                 )

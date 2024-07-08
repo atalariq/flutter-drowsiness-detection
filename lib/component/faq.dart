@@ -60,15 +60,20 @@ class _FAQState extends State<FAQ> {
     return ListExpandableWidget(
       ansDecoration: widget.ansDecoration ??
           BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: const BorderRadius.all(Radius.circular(20))),
+              borderRadius: const BorderRadius.all(Radius.circular(0))),
       queDecoration: widget.queDecoration ??
           BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: const BorderRadius.all(Radius.circular(20))),
+              borderRadius: const BorderRadius.all(Radius.circular(0))),
       ansPadding: widget.ansPadding ??
           const EdgeInsets.symmetric(horizontal: 35.0, vertical: 10),
-      separator: widget.separator ?? const Divider(),
+      separator: widget.separator ??
+          const Divider(
+            height: 0,
+            thickness: 0,
+            indent: 0,
+            endIndent: 0,
+            color: Colors.white,
+          ),
       showDivider: widget.showDivider,
       isExpanded: widget.isExpanded,
       expandedIcon:
@@ -151,7 +156,7 @@ class _ListExpandableWidgetState extends State<ListExpandableWidget> {
     if (!widget.isExpanded!) {
       children.add(widget.showDivider == false
           ? const SizedBox(
-              height: 5,
+              height: 0,
             )
           : widget.separator);
     }
@@ -174,14 +179,21 @@ class _ListExpandableWidgetState extends State<ListExpandableWidget> {
   Widget _buildListItems(BuildContext context) {
     List<Widget> titles = [];
     titles.add(_wrapHeader());
-    titles.add(Container(
+    titles.add(
+      Container(
         width: double.infinity,
         decoration: widget.ansDecoration,
         padding: widget.ansPadding,
-        child: widget.items));
+        child: widget.items,
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: ListTile.divideTiles(tiles: titles, context: context).toList(),
+      children: ListTile.divideTiles(
+        tiles: titles,
+        context: context,
+        color: Colors.white,
+      ).toList(),
     );
   }
 }

@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../detector.dart';
-
 class SettingsPage extends StatefulWidget {
-  final DrowsinessDetector drowsinessDetector;
-
-  const SettingsPage({super.key, required this.drowsinessDetector});
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -60,122 +56,158 @@ class _SettingsPageState extends State<SettingsPage> {
     prefs.setInt('alarmInterval', interval);
   }
 
+  TextStyle titleTextStyle = TextStyle(
+    fontFamily: "Roboto",
+    fontWeight: FontWeight.w500,
+    fontSize: 16,
+    color: Colors.black,
+  );
+
+  TextStyle subtitleTextStyle = TextStyle(
+    fontFamily: "Roboto",
+    fontWeight: FontWeight.w400,
+    fontSize: 10,
+    color: Colors.black,
+  );
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Title
-          Text(
-            'Pengaturan',
-            style: TextStyle(
-              fontSize: 20,
-              fontFamily: "Roboto",
-              fontWeight: FontWeight.w500,
-            ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 32,
           ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Container(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Title
+            Text(
+              'Pengaturan',
+              style: TextStyle(
+                fontSize: 20,
+                fontFamily: "Roboto",
+                fontWeight: FontWeight.w500,
+              ),
+            ),
 
-          Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SwitchListTile(
-                  title: Text('Enable Camera Preview'),
-                  value: _previewEnabled,
-                  onChanged: (value) async {
-                    setState(() {
-                      _previewEnabled = value;
-                    });
-                    await widget.drowsinessDetector.togglePreview();
-                    await _saveSettings();
-                  },
-                ),
-                ListTile(
-                  title: Text('Camera Mode'),
-                  subtitle: Text(_cameraModeIndex == 0 ? 'Front' : 'Back'),
-                  trailing: DropdownButton<int>(
-                    value: _cameraModeIndex,
-                    items: [
-                      DropdownMenuItem(
-                        value: 0,
-                        child: Text('Front'),
-                      ),
-                      DropdownMenuItem(
-                        value: 1,
-                        child: Text('Back'),
-                      ),
-                    ],
-                    onChanged: (int? newValue) async {
-                      if (newValue != null) {
-                        setState(() {
-                          _cameraModeIndex = newValue;
-                        });
-                        await widget.drowsinessDetector.toggleMode();
-                        await _saveSettings();
-                      }
+            Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ListTile(
+                    title: Text('Mode Kamera', style: titleTextStyle),
+                    subtitle: Text('Atur penggunaan kamera depan/belakang',
+                        style: subtitleTextStyle),
+                    trailing: DropdownButton<int>(
+                      value: _cameraModeIndex,
+                      items: const [
+                        DropdownMenuItem(
+                          value: 0,
+                          child: Text('Depan'),
+                        ),
+                        DropdownMenuItem(
+                          value: 1,
+                          child: Text('Belakang'),
+                        ),
+                      ],
+                      onChanged: (int? newValue) async {
+                        if (newValue != null) {
+                          setState(() {
+                            _cameraModeIndex = newValue;
+                          });
+                          await _saveSettings();
+                        }
+                      },
+                    ),
+                  ),
+                  SwitchListTile(
+                    title: Text('Pratinjau Kamera', style: titleTextStyle),
+                    subtitle: Text(
+                      'Tampilkan pratinjau secara bawaan\n(Nonaktifkan untuk menghemat baterai)',
+                      style: subtitleTextStyle,
+                    ),
+                    value: _previewEnabled,
+                    onChanged: (value) async {
+                      setState(() {
+                        _previewEnabled = value;
+                      });
+                      await _saveSettings();
                     },
                   ),
-                ),
-                ListTile(
-                  title: Text('Drowsiness Interval (seconds)'),
-                  trailing: DropdownButton<int>(
-                    value: _alarmInterval,
-                    items: [3, 5, 7, 10].map((int value) {
-                      return DropdownMenuItem<int>(
-                        value: value,
-                        child: Text(value.toString()),
+                  ListTile(
+                    title: Text('Interval Peringatan', style: titleTextStyle),
+                    subtitle: Text(
+                        'Atur jeda alarm peringatan ketika terdeteksi (detik)',
+                        style: subtitleTextStyle),
+                    trailing: DropdownButton<int>(
+                      value: _alarmInterval,
+                      items: [3, 5, 7, 10].map((int value) {
+                        return DropdownMenuItem<int>(
+                          value: value,
+                          child: Text(value.toString()),
+                        );
+                      }).toList(),
+                      onChanged: (int? newValue) async {
+                        if (newValue != null) {
+                          setState(() {
+                            _alarmInterval = newValue;
+                          });
+                          await _saveSettings();
+                        }
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('Bunyi Alarm', style: titleTextStyle),
+                    subtitle: Text('Atur bunyi alarm yang digunakan',
+                        style: subtitleTextStyle),
+                    trailing: DropdownButton<String>(
+                      value: _alarmSound,
+                      items: _alarmSounds.map((String sound) {
+                        return DropdownMenuItem<String>(
+                          value: sound,
+                          child: Text(sound),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) async {
+                        if (newValue != null) {
+                          setState(() {
+                            _alarmSound = newValue;
+                          });
+                          await _saveSettings();
+                        }
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: Text('Atur Ulang', style: titleTextStyle),
+                    subtitle: Text(
+                      'Tekan lama untuk kembali ke pengaturan awal',
+                      style: subtitleTextStyle,
+                    ),
+                    onLongPress: () async {
+                      _resetSettings();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Settings reset to default')),
                       );
-                    }).toList(),
-                    onChanged: (int? newValue) async {
-                      if (newValue != null) {
-                        setState(() {
-                          _alarmInterval = newValue;
-                        });
-                        await widget.drowsinessDetector
-                            .updateDrowsinessInterval(newValue);
-                        await _saveSettings();
-                      }
                     },
                   ),
-                ),
-                ListTile(
-                  title: Text('Alarm Sound'),
-                  trailing: DropdownButton<String>(
-                    value: _alarmSound,
-                    items: _alarmSounds.map((String sound) {
-                      return DropdownMenuItem<String>(
-                        value: sound,
-                        child: Text(sound),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) async {
-                      if (newValue != null) {
-                        setState(() {
-                          _alarmSound = newValue;
-                        });
-                        await _saveSettings();
-                      }
-                    },
-                  ),
-                ),
-                SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: () async {
-                    _resetSettings();
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Settings reset to default')),
-                    );
-                  },
-                  child: Text('Reset Settings'),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -11,10 +11,22 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   late bool _showIntroPage;
 
+    // Loads preferences asynchronously and sets the value of _showIntroPage based on the 'isFirstLaunch' key in SharedPreferences.
+  void _loadSettings() async {
+    final prefs = await SharedPreferences.getInstance();
+    _showIntroPage = prefs.getBool('isFirstLaunch') ?? true;
+  }
+
+  /// Sets the value of the 'isFirstLaunch' key in the shared preferences to false.
+  void _dontShowIntroAgain() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isFirstLaunch', false);
+  }
+
   @override
   void initState() {
     super.initState();
-    _loadPreferences();
+    _loadSettings();
 
     // Timer
     Future.delayed(Duration(seconds: 3), () {
@@ -25,18 +37,6 @@ class _SplashScreenState extends State<SplashScreen> {
         Navigator.pushReplacementNamed(context, '/home');
       }
     });
-  }
-
-  // Loads preferences asynchronously and sets the value of _showIntroPage based on the 'isFirstLaunch' key in SharedPreferences.
-  void _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-    _showIntroPage = prefs.getBool('isFirstLaunch') ?? true;
-  }
-
-  /// Sets the value of the 'isFirstLaunch' key in the shared preferences to false.
-  void _dontShowIntroAgain() async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setBool('isFirstLaunch', false);
   }
 
   @override

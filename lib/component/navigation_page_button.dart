@@ -19,19 +19,18 @@ class NavButton extends StatelessWidget {
         Navigator.pushNamed(context, destination);
       },
       child: Ink(
-        width: 80,
-        height: 80,
+        width: 100,
+        height: 100,
         decoration: BoxDecoration(
           color: Color(0x66FFB81C),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
               icon,
-              size: 20,
+              size: 24,
             ),
             const SizedBox(height: 5),
             Text(

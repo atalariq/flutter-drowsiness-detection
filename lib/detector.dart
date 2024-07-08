@@ -12,8 +12,8 @@ class DrowsinessDetector {
   bool isDrowsy = false;
   bool isPreviewEnabled = true;
   CameraLensDirection cameraLensDirection = CameraLensDirection.front;
-  Timer? drowsinessTimer;
-  int alarmInterval = 5; // Default 5 seconds
+  Timer? alarmTimer;
+  int alarmInterval = 3; // Default 3 seconds
   String alarmSound = 'alarm1'; // Default alarm sound
   bool isAlarmPlaying = false;
 
@@ -23,12 +23,18 @@ class DrowsinessDetector {
     _initializeFaceDetector();
   }
 
+  void dispose() {
+    cameraController?.dispose();
+    faceDetector?.close();
+    alarmTimer?.cancel();
+  }
+
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     isPreviewEnabled = prefs.getBool('previewEnabled') ?? true;
     cameraLensDirection =
         CameraLensDirection.values[prefs.getInt('cameraMode') ?? 0];
-    alarmInterval = prefs.getInt('alarmInterval') ?? 5;
+    alarmInterval = prefs.getInt('alarmInterval') ?? 3;
     alarmSound = prefs.getString('alarmSound') ?? 'alarm1';
   }
 
@@ -50,33 +56,62 @@ class DrowsinessDetector {
     );
   }
 
+  void _startDrowsinessTimer() {
+    alarmTimer?.cancel();
+    alarmTimer = Timer(Duration(seconds: alarmInterval), () {
+      if (isDrowsy) {
+        _playAlarm();
+      }
+    });
+  }
+
+  Future<void> startDetection() async {
+    _startDetection();
+  }
+
+  Future<void> stopDetection() async {
+    await cameraController?.stopImageStream();
+    isDetecting = false;
+  }
+
   void _startDetection() {
     cameraController?.startImageStream((CameraImage image) async {
       if (isDetecting) return;
 
       isDetecting = true;
-      final inputImage = _processCameraImage(image);
-      final faces = await faceDetector?.processImage(inputImage);
 
-      if (faces != null && faces.isNotEmpty) {
-        final face = faces.first;
-        final leftEyeOpen = face.leftEyeOpenProbability ?? 1.0;
-        final rightEyeOpen = face.rightEyeOpenProbability ?? 1.0;
+      try {
+        final inputImage = _processCameraImage(image);
+        final faces = await faceDetector?.processImage(inputImage);
 
-        if (leftEyeOpen < 0.4 && rightEyeOpen < 0.4) {
-          if (!isDrowsy) {
-            isDrowsy = true;
-            _startDrowsinessTimer();
+        if (faces != null && faces.isNotEmpty) {
+          final face = faces.first;
+          final leftEyeOpen = face.leftEyeOpenProbability ?? 1.0;
+          final rightEyeOpen = face.rightEyeOpenProbability ?? 1.0;
+
+          if (leftEyeOpen < 0.3 && rightEyeOpen < 0.3) {
+            if (!isDrowsy) {
+              isDrowsy = true;
+              _startDrowsinessTimer();
+            }
+          } else {
+            _resetDrowsiness();
           }
         } else {
           _resetDrowsiness();
         }
-      } else {
-        _resetDrowsiness();
+      } catch (e) {
+        print('Error processing image: $e');
       }
 
       isDetecting = false;
     });
+  }
+
+  void _resetDrowsiness() {
+    isDrowsy = false;
+    alarmTimer?.cancel();
+    stopAlarm();
   }
 
   InputImage _processCameraImage(CameraImage image) {
@@ -100,34 +135,10 @@ class DrowsinessDetector {
     );
   }
 
-  void _startDrowsinessTimer() {
-    drowsinessTimer?.cancel();
-    drowsinessTimer = Timer(Duration(seconds: alarmInterval), () {
-      if (isDrowsy) {
-        _playAlarm();
-      }
-    });
-  }
-
-  void _resetDrowsiness() {
-    isDrowsy = false;
-    drowsinessTimer?.cancel();
-    stopAlarm();
-  }
-
-  Future<void> startDetection() async {
-    _startDetection();
-  }
-
-  Future<void> stopDetection() async {
-    await cameraController?.stopImageStream();
-    isDetecting = false;
-  }
-
   Future<void> _playAlarm() async {
     if (!isAlarmPlaying) {
       isAlarmPlaying = true;
-      FlutterRingtonePlayer().playAlarm();
+      FlutterRingtonePlayer().playAlarm(volume: 1.0);
     }
   }
 
@@ -136,12 +147,6 @@ class DrowsinessDetector {
       FlutterRingtonePlayer().stop();
       isAlarmPlaying = false;
     }
-  }
-
-  void dispose() {
-    cameraController?.dispose();
-    faceDetector?.close();
-    drowsinessTimer?.cancel();
   }
 
   Future<void> toggleMode() async {
@@ -156,18 +161,5 @@ class DrowsinessDetector {
     SharedPreferences.getInstance().then((prefs) {
       prefs.setBool('previewEnabled', isPreviewEnabled);
     });
-  }
-
-  Future<void> updateDrowsinessInterval(int newInterval) async {
-    alarmInterval = newInterval;
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('drowsinessInterval', newInterval);
-  }
-
-  Future<void> resetSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    await _loadSettings();
-    await initialize();
   }
 }

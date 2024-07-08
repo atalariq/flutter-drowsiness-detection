@@ -19,18 +19,8 @@ class HelpPage extends StatelessWidget {
         fontFamily: "Roboto",
         fontWeight: FontWeight.w400,
       ),
-      ansDecoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
-      queDecoration: BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-      ),
       // ansPadding: EdgeInsets.symmetric(horizontal: 60, vertical: 0),
-      ansPadding: EdgeInsets.only(left: 60, right: 20, top: 0, bottom: 0),
-      expandedIcon: Icon(Icons.keyboard_arrow_down),
-      collapsedIcon: Icon(Icons.keyboard_arrow_right),
-      showDivider: false,
-      separator: SizedBox.shrink(),
+      ansPadding: EdgeInsets.only(left: 55, right: 20, top: 10, bottom: 0),
     );
   }
 

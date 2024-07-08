@@ -77,38 +77,30 @@ class _MonitoringPageState extends State<MonitoringPage> {
           },
         ),
       ),
-      body: Center(
+      body: Container(
+        color: Colors.black,
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             // Camera Preview
             Stack(
               children: [
                 if (_drowsinessDetector.cameraController != null &&
                     _drowsinessDetector.cameraController!.value.isInitialized &&
                     _drowsinessDetector.isPreviewEnabled)
-                  CameraPreview(_drowsinessDetector.cameraController!),
+                  CameraPreview(_drowsinessDetector.cameraController!)
               ],
             ),
+
+            Spacer(),
 
             // Status Label + Buttons
             Container(
               color: Colors.black,
-              height: 120,
+              height: 140,
               child: Column(
                 children: [
-                  SizedBox(height: 10),
-
-                  // Label
-                  Text(
-                    "Status: ${_isDetecting ? (_isDrowsy ? 'Alarm!!!' : 'Aktif') : 'Tidak Aktif'}",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                    ),
-                  ),
                   SizedBox(height: 10),
 
                   // Buttons
@@ -120,7 +112,9 @@ class _MonitoringPageState extends State<MonitoringPage> {
                         icon: Icon(
                           Icons.preview_outlined,
                           size: 60,
-                          color: Colors.white,
+                          color: (_drowsinessDetector.isPreviewEnabled
+                              ? Colors.white
+                              : Colors.red),
                         ),
                         onPressed: () {
                           setState(() {
@@ -132,11 +126,11 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       SizedBox(width: 30),
 
                       // Start/Stop Detection
-                      (_isAlarmPlaying)
+                      (_isAlarmPlaying || _isDetecting)
                           ? IconButton(
                               icon: Icon(
                                 Icons.adjust_outlined,
-                                size: 60,
+                                size: 80,
                                 color: Colors.red,
                               ),
                               onPressed: _stopAlarm,
@@ -144,7 +138,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
                           : IconButton(
                               icon: Icon(
                                 Icons.adjust_outlined,
-                                size: 60,
+                                size: 80,
                                 color: Colors.white,
                               ),
                               onPressed: _toggleDetection,
@@ -166,6 +160,21 @@ class _MonitoringPageState extends State<MonitoringPage> {
                       ),
                     ],
                   ),
+
+                  SizedBox(height: 5),
+
+                  // Label
+                  Text(
+                    "Status: ${_isDetecting ? (_isAlarmPlaying ? 'Alarm!!!' : 'Aktif') : 'Tidak Aktif'}",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: "Roboto",
+                      fontWeight: FontWeight.w400,
+                      fontSize: 8,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+
                 ],
               ),
             )
