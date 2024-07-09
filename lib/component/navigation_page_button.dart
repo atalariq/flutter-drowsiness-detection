@@ -3,21 +3,25 @@ import 'package:flutter/material.dart';
 class NavButton extends StatelessWidget {
   final String text;
   final IconData icon;
-  final String destination;
+  final String? destination;
+  final VoidCallback? onTap;
 
   const NavButton({
     super.key,
     required this.text,
     required this.icon,
-    required this.destination,
+    this.destination,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        Navigator.pushNamed(context, destination);
-      },
+      onTap: (destination != null)
+          ? () {
+              Navigator.pushNamed(context, destination!);
+            }
+          : onTap,
       child: Ink(
         width: 100,
         height: 100,

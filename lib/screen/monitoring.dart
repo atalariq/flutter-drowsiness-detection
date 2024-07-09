@@ -8,16 +8,16 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class MonitoringPageV2 extends StatefulWidget {
+class MonitoringPage extends StatefulWidget {
   final List<CameraDescription> cameras;
 
-  const MonitoringPageV2({super.key, required this.cameras});
+  const MonitoringPage({super.key, required this.cameras});
 
   @override
-  State<MonitoringPageV2> createState() => _MonitoringPageV2State();
+  State<MonitoringPage> createState() => _MonitoringPageState();
 }
 
-class _MonitoringPageV2State extends State<MonitoringPageV2> {
+class _MonitoringPageState extends State<MonitoringPage> {
   static const platform = MethodChannel('com.riqqq.siperisai/volume');
 
   late CameraController _controller;
@@ -41,10 +41,37 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
   int alarmInterval = 3;
   String alarmSound = 'alarm1';
 
+  // Statistics =========================================================
+  final Stopwatch _detectorUptime = Stopwatch();
+  int _totalFrames = 0;
+  double _sumEyeOpenProbabilities = 0.0;
+
+  Timer? uptimeTimer;
+  int _uptime = 0;
+  double _awakenessLevel = 0.0;
+  double _drowsinessLevel = 0.0;
+
+  Future<void> _loadStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    _uptime = prefs.getInt('statUptime') ?? 0;
+    _awakenessLevel = prefs.getDouble('statAwakenessLevel') ?? 0.0;
+    _drowsinessLevel = prefs.getDouble('statDrowsinessLevel') ?? 0.0;
+  }
+
+  Future<void> _saveStats() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('statUptime', _uptime);
+    await prefs.setDouble('statAwakenessLevel', _awakenessLevel);
+    await prefs.setDouble('statDrowsinessLevel', _drowsinessLevel);
+  }
+
+  // =====================================================================================================
+
   @override
   void initState() {
     super.initState();
     _loadSettings();
+    _loadStats();
     _initializeCamera();
     _initializeFaceDetector();
     // _playAlarmSound();
@@ -86,6 +113,9 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
     _cameraIndex = prefs.getInt('cameraMode') ?? 1;
     alarmInterval = prefs.getInt('alarmInterval') ?? 3;
     alarmSound = prefs.getString('alarmSound') ?? 'alarm1';
+
+    _customLog(
+        'Settings loaded: previewEnabled=$isPreviewEnabled, cameraLensDirection=$_cameraIndex, drowsinessInterval=$alarmInterval, alarmSound=$alarmSound');
   }
 
   void _initializeCamera() {
@@ -99,6 +129,8 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
       setState(() {});
       // _startImageStream();
     });
+
+    _customLog('Camera initialized with direction: $_cameraIndex');
   }
 
   void _initializeFaceDetector() {
@@ -111,6 +143,8 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
       // enableTracking: false,
     );
     _faceDetector = FaceDetector(options: options);
+
+    _customLog('Face detector initialized');
   }
 
   void _toggleDetection() {
@@ -127,12 +161,14 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
   void _startImageStream() {
     _customLog(
         "BBBBB: _startImageStream() executed. isDetecting: $_isDetecting");
+
     _controller.startImageStream((CameraImage image) {
       _customLog("BBBBB: _controller() executed. isDetecting: $_isDetecting");
-
       if (_isDetecting) return;
-      _isDetecting = true;
       _processCameraImage(image);
+      _isDetecting = true;
+      _detectorUptime.start();
+      _startUptimeTimer();
     });
   }
 
@@ -140,7 +176,17 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
     _customLog(
         "BBBBB: _stopImageStream() executed. isDetecting: $_isDetecting");
 
-    _controller.stopImageStream();
+    if (_isDetecting) {
+      _controller.stopImageStream();
+      _detectorUptime.stop();
+      uptimeTimer?.cancel();
+    }
+  }
+
+  void _startUptimeTimer() {
+    uptimeTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+      _uptime = _detectorUptime.elapsed.inSeconds;
+    });
   }
 
   Future<void> _processCameraImage(CameraImage image) async {
@@ -226,6 +272,11 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
     final leftEyeOpen = face.leftEyeOpenProbability ?? 1.0;
     final rightEyeOpen = face.rightEyeOpenProbability ?? 1.0;
 
+    _totalFrames++;
+    _sumEyeOpenProbabilities += (leftEyeOpen + rightEyeOpen) / 2;
+    _awakenessLevel = _sumEyeOpenProbabilities / _totalFrames;
+    _drowsinessLevel = 1.0 - _awakenessLevel;
+
     if (leftEyeOpen < 0.1 && rightEyeOpen < 0.1) {
       _closedEyesFrameCount++;
     } else {
@@ -247,11 +298,21 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
 
   void _playAlarmSound() async {
     _customLog("BBBBB: _playAlarmSound() executed");
-    _startImageStream();
+
     if (!_isAlarmPlaying) {
-      FlutterRingtonePlayer().playAlarm(
+      // FlutterRingtonePlayer().playAlarm(
+      //   looping: true,
+      //   // volume: 1.0,
+      // );
+
+      // FlutterRingtonePlayer().play(
+      //   fromAsset: "assets/audio/sound-alert.mp3",
+      //   looping: true,
+      // );
+      FlutterRingtonePlayer().play(
+        fromAsset: "assets/audio/sound-alarm1.mp3",
+        volume: 1.0,
         looping: true,
-        // volume: 1.0,
       );
       setState(() {
         _isAlarmPlaying = true;
@@ -282,7 +343,6 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
     _controller.initialize().then((_) {
       if (!mounted) return;
       setState(() {});
-      // _startImageStream();
     });
 
     if (_detectionEnabled) {
@@ -301,6 +361,7 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
   void dispose() {
     _controller.dispose();
     _faceDetector.close();
+    _saveStats();
     _stopAlarmSound();
     super.dispose();
   }
@@ -320,7 +381,12 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
             size: 32,
           ),
           onPressed: () {
-            Navigator.pop(context);
+            _saveStats();
+            Navigator.pop(context, [
+              _uptime,
+              _awakenessLevel,
+              _drowsinessLevel,
+            ]);
           },
         ),
       ),

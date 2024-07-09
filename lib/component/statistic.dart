@@ -1,28 +1,24 @@
 import 'package:flutter/material.dart';
 
-class StatsWidget extends StatefulWidget {
-  const StatsWidget({super.key});
+class StatWidget extends StatefulWidget {
+  final int uptime;
+  final double awakenessLevel;
+  final double drowsinessLevel;
+  final VoidCallback resetStat;
+
+  const StatWidget({
+    super.key,
+    required this.uptime,
+    required this.awakenessLevel,
+    required this.drowsinessLevel,
+    required this.resetStat,
+  });
 
   @override
-  State<StatsWidget> createState() => _StatsWidgetState();
+  State<StatWidget> createState() => _StatWidgetState();
 }
 
-class _StatsWidgetState extends State<StatsWidget> {
-  String _conclusion = "Kondisi Anda Masih Baik!";
-  String _uptime = "00:00";
-  int _awakeness = 100;
-  int _sleepiness = 0;
-
-  void _resetStats() {
-    // Implement your reset logic here
-    setState(() {
-      _conclusion = "Kondisi Anda Masih Baik!";
-      _uptime = "00:00";
-      _awakeness = 100;
-      _sleepiness = 0;
-    });
-  }
-
+class _StatWidgetState extends State<StatWidget> {
   // Stat Widget helper
   Widget _miniStat(String title, String value) {
     return Container(
@@ -61,9 +57,12 @@ class _StatsWidgetState extends State<StatsWidget> {
 
   @override
   Widget build(BuildContext context) {
+    String conclusion = (widget.drowsinessLevel < 0.4)
+        ? "Kondisi Anda Masih Baik!"
+        : "Anda Sebaiknya Istirahat!";
     return Container(
       width: 320,
-      height: 210,
+      height: 220,
       decoration: BoxDecoration(
         color: Color(0x66FFB81C),
         borderRadius: BorderRadius.all(Radius.circular(30)),
@@ -89,7 +88,7 @@ class _StatsWidgetState extends State<StatsWidget> {
                 ),
                 Spacer(),
                 InkWell(
-                  onTap: _resetStats, // Handle your callback
+                  onTap: widget.resetStat, // Handle your callback
                   child: Ink(
                     width: 75,
                     height: 25,
@@ -134,18 +133,21 @@ class _StatsWidgetState extends State<StatsWidget> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _miniStat("Waktu\nPemakaian", _uptime),
+                _miniStat("Waktu\nPemakaian",
+                    "${(widget.uptime / 60).toDouble().toStringAsFixed(2)}m"),
                 SizedBox(width: 10),
-                _miniStat("Tingkat\nKesadaran", "${_awakeness.toString()}%"),
+                _miniStat("Tingkat\nKesadaran",
+                    "${(widget.awakenessLevel * 100).toStringAsFixed(2)}%"),
                 SizedBox(width: 10),
-                _miniStat("Tingkat\nKantuk", "${_sleepiness.toString()}%"),
+                _miniStat("Tingkat\nKantuk",
+                    "${(widget.drowsinessLevel * 100).toStringAsFixed(2)}%"),
               ],
             ),
           ),
 
           // Conclusion
           Text(
-            _conclusion,
+            conclusion,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 20,

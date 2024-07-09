@@ -16,8 +16,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   final List<String> _alarmSounds = [
     'alarm1',
-    'alarm2',
-    'alarm3',
   ];
 
   @override
