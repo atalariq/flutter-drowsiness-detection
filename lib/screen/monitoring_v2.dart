@@ -1,6 +1,7 @@
 import 'dart:async';
+import 'dart:developer' show log;
+import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
@@ -8,25 +9,35 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MonitoringPageV2 extends StatefulWidget {
-  final CameraDescription camera;
+  final List<CameraDescription> cameras;
 
-  const MonitoringPageV2({super.key, required this.camera});
+  const MonitoringPageV2({super.key, required this.cameras});
 
   @override
   State<MonitoringPageV2> createState() => _MonitoringPageV2State();
 }
 
 class _MonitoringPageV2State extends State<MonitoringPageV2> {
+  static const platform = MethodChannel('com.riqqq.siperisai/volume');
+
   late CameraController _controller;
   late FaceDetector _faceDetector;
+
+  final _orientations = {
+    DeviceOrientation.portraitUp: 0,
+    DeviceOrientation.landscapeLeft: 90,
+    DeviceOrientation.portraitDown: 180,
+    DeviceOrientation.landscapeRight: 270,
+  };
+
+  bool _detectionEnabled = false;
   bool _isDetecting = false;
   bool _isDrowsy = false;
-  int _closedEyesFrameCount = 0;
-  Timer? _alarmTimer;
   bool _isAlarmPlaying = false;
+  int _closedEyesFrameCount = 0;
 
   bool isPreviewEnabled = true;
-  CameraLensDirection cameraLensDirection = CameraLensDirection.front;
+  int _cameraIndex = 1;
   int alarmInterval = 3;
   String alarmSound = 'alarm1';
 
@@ -36,52 +47,111 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
     _loadSettings();
     _initializeCamera();
     _initializeFaceDetector();
+    // _playAlarmSound();
+    platform.setMethodCallHandler(_handleMethodCall);
+  }
+
+  // For debugging
+  bool enableLogging = false;
+
+  void _customLog(String message) {
+    if (!enableLogging) return;
+
+    return log(
+      message,
+      name: "Custom Bro!",
+      level: 1000,
+      error: message,
+    );
+  }
+
+  Future<void> _handleMethodCall(MethodCall call) async {
+    switch (call.method) {
+      case 'volumeButtonPressed':
+        if (call.arguments == 'up') {
+          _playAlarmSound();
+        } else if (call.arguments == 'down') {
+          _stopAlarmSound();
+          // Handle volume down button press
+        }
+        break;
+      default:
+        throw MissingPluginException('Not implemented: ${call.method}');
+    }
   }
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
     isPreviewEnabled = prefs.getBool('previewEnabled') ?? true;
-    cameraLensDirection =
-        CameraLensDirection.values[prefs.getInt('cameraMode') ?? 0];
+    _cameraIndex = prefs.getInt('cameraMode') ?? 1;
     alarmInterval = prefs.getInt('alarmInterval') ?? 3;
     alarmSound = prefs.getString('alarmSound') ?? 'alarm1';
   }
 
   void _initializeCamera() {
     _controller = CameraController(
-      widget.camera,
-      defaultTargetPlatform == TargetPlatform.android
-          ? ResolutionPreset.veryHigh
-          : ResolutionPreset.high,
+      widget.cameras[_cameraIndex],
+      ResolutionPreset.low,
+      enableAudio: false,
     );
     _controller.initialize().then((_) {
       if (!mounted) return;
       setState(() {});
-      _startImageStream();
+      // _startImageStream();
     });
   }
 
   void _initializeFaceDetector() {
     final options = FaceDetectorOptions(
       performanceMode: FaceDetectorMode.fast,
-      // minFaceSize: 0.1,
+      minFaceSize: 0.3,
       enableClassification: true,
-      // enableLandmarks: true,
-      // enableContours: true
-      // enableTracking: true
+      // enableLandmarks: false,
+      // enableContours: false,
+      // enableTracking: false,
     );
     _faceDetector = FaceDetector(options: options);
   }
 
+  void _toggleDetection() {
+    setState(() {
+      _detectionEnabled = !_detectionEnabled;
+    });
+    if (_detectionEnabled) {
+      _startImageStream();
+    } else {
+      _stopImageStream();
+    }
+  }
+
   void _startImageStream() {
+    _customLog(
+        "BBBBB: _startImageStream() executed. isDetecting: $_isDetecting");
     _controller.startImageStream((CameraImage image) {
+      _customLog("BBBBB: _controller() executed. isDetecting: $_isDetecting");
+
       if (_isDetecting) return;
       _isDetecting = true;
       _processCameraImage(image);
     });
   }
 
+  void _stopImageStream() {
+    _customLog(
+        "BBBBB: _stopImageStream() executed. isDetecting: $_isDetecting");
+
+    _controller.stopImageStream();
+  }
+
   Future<void> _processCameraImage(CameraImage image) async {
+    final camera = _controller.description;
+    final sensorOrientation = camera.sensorOrientation;
+
+    _customLog(
+        "BBBBB: _processImageCamera() executed. camera: $camera, sensor: $sensorOrientation");
+
+    final plane = image.planes.first;
+
     final WriteBuffer allBytes = WriteBuffer();
     for (final Plane plane in image.planes) {
       allBytes.putUint8List(plane.bytes);
@@ -90,18 +160,38 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
 
     final imageSize = Size(image.width.toDouble(), image.height.toDouble());
 
-    final imageRotation =
-        InputImageRotationValue.fromRawValue(widget.camera.sensorOrientation) ??
-            InputImageRotation.rotation0deg;
-    final inputImageFormat =
-        InputImageFormatValue.fromRawValue(image.format.raw) ??
-            InputImageFormat.nv21;
+    InputImageRotation? imageRotation;
+    if (Platform.isIOS) {
+      imageRotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+    } else if (Platform.isAndroid) {
+      var rotationCompensation =
+          _orientations[_controller.value.deviceOrientation];
+      if (rotationCompensation == null) {
+        _customLog('BBBBB: rotationCompensation null');
+        return;
+      }
+      if (camera.lensDirection == CameraLensDirection.front) {
+        rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
+      } else {
+        rotationCompensation =
+            (sensorOrientation - rotationCompensation + 360) % 360;
+      }
+      imageRotation =
+          InputImageRotationValue.fromRawValue(rotationCompensation);
+    }
+    if (imageRotation == null) {
+      _customLog('BBBBB: imageRotation error');
+      return;
+    }
+
+    final imageFormat = InputImageFormatValue.fromRawValue(image.format.raw) ??
+        InputImageFormat.nv21;
 
     final inputImageData = InputImageMetadata(
       size: imageSize,
       rotation: imageRotation,
-      format: inputImageFormat,
-      bytesPerRow: image.planes[0].bytesPerRow,
+      format: imageFormat,
+      bytesPerRow: plane.bytesPerRow,
     );
 
     final inputImage = InputImage.fromBytes(
@@ -109,15 +199,26 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
       metadata: inputImageData,
     );
 
-    final faces = await _faceDetector.processImage(inputImage);
-    _detectDrowsiness(faces);
+    // final inputImage = _inputImageFromCameraImage(image);
 
-    _isDetecting = false;
+    try {
+      _customLog('BBBBB: Try Detect Drowsiness');
+      final faces = await _faceDetector.processImage(inputImage);
+      _detectDrowsiness(faces);
+    } catch (e) {
+      _customLog('BBBBB: Error processing image: $e');
+    } finally {
+      _isDetecting = false;
+    }
   }
 
   void _detectDrowsiness(List<Face> faces) {
+    _customLog("BBBBB: Faces detected: ${faces.length}");
     if (faces.isEmpty) {
-      _closedEyesFrameCount = 0;
+      setState(() {
+        _closedEyesFrameCount = 0;
+      });
+      // _stopAlarmSound();
       return;
     }
 
@@ -131,79 +232,68 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
       _closedEyesFrameCount = 0;
     }
 
-    if (_closedEyesFrameCount > 30) {
-      // Adjust this threshold as needed
-      setState(() {
-        _isDrowsy = true;
-      });
-      _scheduleAlarm();
+    if (_closedEyesFrameCount > (alarmInterval * 10)) {
+      _isDrowsy = true;
+      _playAlarmSound();
+      // _stopImageStream();
     } else {
-      setState(() {
-        _isDrowsy = false;
-      });
-      _cancelAlarm();
+      _isDrowsy = false;
+      // _stopAlarmSound();
     }
-  }
 
-  void _scheduleAlarm() {
-    if (_alarmTimer == null || !_alarmTimer!.isActive) {
-      _alarmTimer = Timer(Duration(seconds: alarmInterval), () {
-        _playAlarmSound();
-      });
-    }
-  }
-
-  void _cancelAlarm() {
-    _alarmTimer?.cancel();
+    _customLog(
+        'BBBBB: Left Eye: $leftEyeOpen, Right Eye: $rightEyeOpen, Count: $_closedEyesFrameCount, Drowsy: $_isDrowsy');
   }
 
   void _playAlarmSound() async {
+    _customLog("BBBBB: _playAlarmSound() executed");
+    _startImageStream();
     if (!_isAlarmPlaying) {
-      _isAlarmPlaying = true;
-
-      FlutterRingtonePlayer().play(
-        android: AndroidSounds.alarm,
-        ios: IosSounds.alarm,
+      FlutterRingtonePlayer().playAlarm(
         looping: true,
-        volume: 1.0,
+        // volume: 1.0,
       );
+      setState(() {
+        _isAlarmPlaying = true;
+      });
     }
   }
 
   Future<void> _stopAlarmSound() async {
+    _customLog("BBBBB: _stopAlarmSound() executed");
     if (_isAlarmPlaying) {
       FlutterRingtonePlayer().stop();
+      setState(() {
+        _isAlarmPlaying = false;
+      });
     }
-
-    setState(() {
-      _isAlarmPlaying = false;
-      _isDetecting = false;
-    });
   }
 
-  Future<void> _toggleDetection() async {
-    if (_isDetecting) {
-      await _controller.stopImageStream();
+  void _toggleMode() {
+    _cameraIndex = (_cameraIndex + 1) % widget.cameras.length;
+    _controller.dispose();
+
+    _controller = CameraController(
+      widget.cameras[_cameraIndex],
+      ResolutionPreset.low,
+      enableAudio: false,
+    );
+
+    _controller.initialize().then((_) {
+      if (!mounted) return;
+      setState(() {});
+      // _startImageStream();
+    });
+
+    if (_detectionEnabled) {
       _isDetecting = false;
-    } else {
       _startImageStream();
     }
+  }
+
+  void _togglePreview() {
     setState(() {
-      _isDetecting = !_isDetecting;
-    });
-  }
-
-  Future<void> _toggleMode() async {
-    cameraLensDirection = cameraLensDirection == CameraLensDirection.front
-        ? CameraLensDirection.back
-        : CameraLensDirection.front;
-    _initializeCamera();
-  }
-
-  Future<void> _togglePreview() async {
-    isPreviewEnabled = !isPreviewEnabled;
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setBool('previewEnabled', isPreviewEnabled);
+      isPreviewEnabled = !isPreviewEnabled;
     });
   }
 
@@ -211,13 +301,15 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
   void dispose() {
     _controller.dispose();
     _faceDetector.close();
-    _alarmTimer?.cancel();
     _stopAlarmSound();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    if (!_controller.value.isInitialized) {
+      return Container();
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
@@ -238,9 +330,23 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            Spacer(),
+
             // Camera Preview
-            Expanded(
-              child: CameraPreview(_controller),
+            Stack(
+              children: [
+                isPreviewEnabled
+                    ? CameraPreview(_controller)
+                    : Container(
+                        color: Colors.black,
+                        child: const Text(
+                          "Pratinjau Kamera Tidak Aktif!",
+                          style: TextStyle(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+              ],
             ),
 
             Spacer(),
@@ -250,25 +356,40 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
               color: Colors.black,
               height: 140,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  SizedBox(height: 10),
-
                   // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Toggle Camera Preview
-                      IconButton(
-                        icon: Icon(
-                          Icons.preview_outlined,
-                          size: 60,
-                          color: (isPreviewEnabled ? Colors.white : Colors.red),
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _togglePreview();
-                          });
-                        },
+                      Stack(
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.preview_outlined,
+                              size: 60,
+                              color: Colors.white,
+                            ),
+                            onPressed: () {
+                              _togglePreview();
+                              setState(() {});
+                            },
+                          ),
+                          if (!isPreviewEnabled)
+                            IconButton(
+                              icon: Icon(
+                                Icons.close,
+                                size: 60,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                _togglePreview();
+                                setState(() {});
+                              },
+                            ),
+                        ],
                       ),
 
                       SizedBox(width: 30),
@@ -276,13 +397,17 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
                       // Start/Stop Detection
                       IconButton(
                         icon: Icon(
-                          Icons.adjust_outlined,
+                          (_isAlarmPlaying)
+                              ? Icons.alarm_on
+                              : Icons.adjust_outlined,
                           size: 80,
-                          color: _isAlarmPlaying ? Colors.red : Colors.white,
+                          color: (_isAlarmPlaying || _detectionEnabled)
+                              ? Colors.red
+                              : Colors.white,
                         ),
-                        onPressed: _isAlarmPlaying
+                        onPressed: (_isAlarmPlaying
                             ? _stopAlarmSound
-                            : _toggleDetection,
+                            : _toggleDetection),
                       ),
 
                       SizedBox(width: 30),
@@ -294,8 +419,8 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
                           size: 60,
                           color: Colors.white,
                         ),
-                        onPressed: () async {
-                          await _toggleMode();
+                        onPressed: () {
+                          _toggleMode();
                           setState(() {});
                         },
                       ),
@@ -306,14 +431,31 @@ class _MonitoringPageV2State extends State<MonitoringPageV2> {
 
                   // Label
                   Text(
-                    "Status: ${_isDetecting ? (_isDrowsy ? 'Alarm Bunyi!' : 'Aktif') : 'Tidak Aktif'}",
+                    _isAlarmPlaying
+                        ? 'Bangun!'
+                        : (_detectionEnabled ? "Aktif" : 'Tidak Aktif'),
                     style: TextStyle(
-                      color: Colors.white,
                       fontFamily: "Roboto",
                       fontWeight: FontWeight.w400,
                       fontSize: 8,
+                      color: (_detectionEnabled | _isAlarmPlaying)
+                          ? Colors.red
+                          : Colors.green,
                     ),
                   ),
+
+                  if (enableLogging)
+                    Text(
+                      (_isDrowsy || _isAlarmPlaying) ? 'Wake up!' : 'Awake',
+                      style: TextStyle(
+                          fontFamily: "Roboto",
+                          fontWeight: FontWeight.w400,
+                          fontSize: 8,
+                          color: (_isDrowsy || _isAlarmPlaying)
+                              ? Colors.red
+                              : Colors.green),
+                    ),
+
                   SizedBox(height: 5),
                 ],
               ),

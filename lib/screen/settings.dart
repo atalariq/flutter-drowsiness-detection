@@ -9,8 +9,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  late int _cameraModeIndex;
   late bool _previewEnabled;
+  late int _cameraModeIndex;
   late int _alarmInterval;
   late String _alarmSound;
 
@@ -30,8 +30,8 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _previewEnabled = prefs.getBool('previewEnabled') ?? true;
-      _cameraModeIndex = prefs.getInt('cameraMode') ?? 0;
-      _alarmInterval = prefs.getInt('drowsinessInterval') ?? 5;
+      _cameraModeIndex = prefs.getInt('cameraMode') ?? 1;
+      _alarmInterval = prefs.getInt('alarmInterval') ?? 3;
       _alarmSound = prefs.getString('alarmSound') ?? _alarmSounds.first;
     });
   }
@@ -40,7 +40,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('previewEnabled', _previewEnabled);
     await prefs.setInt('cameraMode', _cameraModeIndex);
-    await prefs.setInt('drowsinessInterval', _alarmInterval);
+    await prefs.setInt('alarmInterval', _alarmInterval);
     await prefs.setString('alarmSound', _alarmSound);
   }
 
@@ -114,11 +114,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       items: const [
                         DropdownMenuItem(
                           value: 0,
-                          child: Text('Depan'),
+                          child: Text('Belakang'),
                         ),
                         DropdownMenuItem(
                           value: 1,
-                          child: Text('Belakang'),
+                          child: Text('Depan'),
                         ),
                       ],
                       onChanged: (int? newValue) async {
@@ -152,7 +152,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         style: subtitleTextStyle),
                     trailing: DropdownButton<int>(
                       value: _alarmInterval,
-                      items: [3, 5, 7, 10].map((int value) {
+                      items: [1, 2, 3, 4, 5].map((int value) {
                         return DropdownMenuItem<int>(
                           value: value,
                           child: Text(value.toString()),

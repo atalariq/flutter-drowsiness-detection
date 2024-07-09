@@ -9,7 +9,7 @@ class StatsWidget extends StatefulWidget {
 
 class _StatsWidgetState extends State<StatsWidget> {
   String _conclusion = "Kondisi Anda Masih Baik!";
-  String _uptime = "00:00:00";
+  String _uptime = "00:00";
   int _awakeness = 100;
   int _sleepiness = 0;
 
@@ -62,11 +62,11 @@ class _StatsWidgetState extends State<StatsWidget> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 300,
-      height: 200,
+      width: 320,
+      height: 210,
       decoration: BoxDecoration(
         color: Color(0x66FFB81C),
-        borderRadius: BorderRadius.all(Radius.circular(16)),
+        borderRadius: BorderRadius.all(Radius.circular(30)),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -80,7 +80,7 @@ class _StatsWidgetState extends State<StatsWidget> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  "Stats",
+                  "Stat",
                   style: TextStyle(
                     fontSize: 30,
                     fontFamily: "Roboto",

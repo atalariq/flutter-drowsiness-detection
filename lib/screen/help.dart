@@ -4,7 +4,7 @@ import '../component/faq.dart';
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
 
-  Widget _wFAQ(String question, String answer) {
+  Widget _createQA(String question, String answer) {
     return FAQ(
       question: question,
       answer: answer,
@@ -19,8 +19,7 @@ class HelpPage extends StatelessWidget {
         fontFamily: "Roboto",
         fontWeight: FontWeight.w400,
       ),
-      // ansPadding: EdgeInsets.symmetric(horizontal: 60, vertical: 0),
-      ansPadding: EdgeInsets.only(left: 55, right: 20, top: 10, bottom: 0),
+      ansPadding: EdgeInsets.symmetric(horizontal: 25, vertical: 5),
     );
   }
 
@@ -58,28 +57,19 @@ class HelpPage extends StatelessWidget {
                 ),
               ),
 
-              // FAQ - 1
-              _wFAQ(
+              _createQA(
                 """Apa itu Si Perisai?""",
-                data,
+                """Aplikasi Si Perisai merupakan kepanjangan dari sistem peringatan dini microsleep berbasis Artificial Intelligence (AI). Ketika tanda-tanda microsleep terdeteksi, aplikasi ini memberikan peringatan suara untuk membangunkan pengemudi dan mencegah kecelakaan.""",
               ),
 
-              // FAQ - 2
-              _wFAQ(
+              _createQA(
                 """Apa itu microsleep?""",
-                data,
+                """Microsleep adalah sebuah kondisi di mana seseorang dalam beraktivitas tiba-tiba tertidur singkat persekian detik, penyebabnya karena kondisi yang sudah sangat lelah.""",
               ),
 
-              // FAQ - 3
-              _wFAQ(
-                """Dimana sebaiknya saya menaruh perangkat saya?""",
-                data,
-              ),
-
-              // FAQ - 4
-              _wFAQ(
+              _createQA(
                 """Saya terdeteksi microsleep, apa yang sebaiknya saya lakukan?""",
-                data,
+                """Sangat disarankan untuk istirahat/tidur sejenak minimal 30 menit. Jika tidak memungkinkan, Anda dapat meminum kopi atau mendengarkan musik yang energik untuk membantu Anda tetap terjaga selama mengemudi.""",
               ),
             ],
           ),
@@ -87,6 +77,3 @@ class HelpPage extends StatelessWidget {
   }
 }
 
-String data = """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc eu rutrum elit, et vehicula ante.
-""";

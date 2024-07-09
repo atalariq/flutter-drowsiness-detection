@@ -13,13 +13,13 @@ import 'screen/splash.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final cameras = await availableCameras();
-  runApp(MyApp(camera: cameras.first));
+  runApp(MyApp(cameras: cameras));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.camera});
+  final List<CameraDescription> cameras;
+  const MyApp({super.key, required this.cameras});
 
-  final CameraDescription camera;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class MyApp extends StatelessWidget {
         '/about': (context) => const AboutUsPage(),
         '/feedback': (context) => const FeedbackPage(),
         '/help': (context) => const HelpPage(),
-        '/monitoring': (context) => MonitoringPageV2(camera: camera),
+        '/monitoring': (context) => MonitoringPageV2(cameras: cameras),
         '/settings': (context) => const SettingsPage(),
       },
     );

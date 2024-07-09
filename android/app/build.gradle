@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.example.myapp"
+    namespace = "com.riqqq.siperisai"
     compileSdk = localProperties.getProperty('flutter.compileSdkVersion').toInteger()
     ndkVersion = flutter.ndkVersion
 
@@ -35,13 +35,14 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.myapp"
+        applicationId = "com.riqqq.siperisai"
         
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         
         // minSdk = flutter.minSdkVersion
-        minSdk = localProperties.getProperty('flutter.minSdkVersion').toInteger()
+        // minSdk = localProperties.getProperty('flutter.minSdkVersion').toInteger()
+        minSdk = 21
         targetSdk = localProperties.getProperty('flutter.targetSdkVersion').toInteger()
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
@@ -54,6 +55,11 @@ android {
             signingConfig = signingConfigs.debug
         }
     }
+}
+
+dependencies {
+    implementation 'com.google.mlkit:face-detection:16.1.5'
+    // implementation 'com.google.android.gms:play-services-mlkit-face-detection:17.1.0'
 }
 
 flutter {
